@@ -1,0 +1,13 @@
+{
+  "cpanel": "cpanel.<domain>",
+  "user": "<cpanel user>",
+  "token": "cpanel API key",
+  "dnsZoneLine": [86, 87],
+  "domains": [
+    "<domain>",
+    "<sub>.<domain>",
+    "<sub>.<domain>"
+  ],
+  "acmepath": "/home/<server user>/.acme.sh/acme.sh",
+  "acmefold": "/home/<server user>/.acme.sh"
+}
