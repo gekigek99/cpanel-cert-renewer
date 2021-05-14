@@ -104,8 +104,11 @@ def main():
         print("removing:", domain)
         output = subprocess.run([config["acmepath"], "--remove", "-d", domain], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout
         print(color.cyan + output + color.end)
-        print("removing:", domain, "folder...", end="")
-        shutil.rmtree(os.path.join(config["acmefold"], domain))
+        print("try to remove:", domain, "folder...", end="")
+        try:
+            shutil.rmtree(os.path.join(config["acmefold"], domain))
+        except:
+            pass
         print("done")
 
     for domain in config["domains"]:
