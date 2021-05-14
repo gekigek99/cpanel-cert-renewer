@@ -1,4 +1,5 @@
 import json
+from ssl import VerifyFlags
 import sys, os, time
 import subprocess
 import http.client
@@ -31,7 +32,8 @@ class cpanelConn:
         conn = http.client.HTTPSConnection(cpanelAddrPort)
         
         print("request: fetchzone_records")
-        conn.request(method="GET", url="/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone_records&domain="+domain+"&line="+str(line), headers=self.headers)
+        requestUrl = "/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone_records&domain="+domain+"&line="+str(line)
+        conn.request(method="GET", url=requestUrl, headers=self.headers, verify=False)
         res = conn.getresponse()
         data = res.read().decode("utf-8")
         
@@ -49,9 +51,9 @@ class cpanelConn:
             conn = http.client.HTTPSConnection(cpanelAddrPort)
 
             print("request: edit_zone_record")
-            editUrl = "/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=edit_zone_record&line="+str(line)+"&domain="+domain+"&name="+name+"&type="+type+"&txtdata="+txtdata
-            print(color.green, editUrl, color.end)
-            conn.request(method="GET", url=editUrl, headers=self.headers)
+            requestUrl = "/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=edit_zone_record&line="+str(line)+"&domain="+domain+"&name="+name+"&type="+type+"&txtdata="+txtdata
+            print(color.green, requestUrl, color.end)
+            conn.request(method="GET", url=requestUrl, headers=self.headers, verify=False)
             res = conn.getresponse()
             data = res.read().decode("utf-8")
             
@@ -68,7 +70,9 @@ class cpanelConn:
         conn = http.client.HTTPSConnection(self.cpaneladdr + ":2083")
 
         print("request: installssl")
-        conn.request(method="POST", url="/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=SSL&cpanel_jsonapi_func=installssl&crt="+cert+"&key="+key, headers=self.headers)
+        requestUrl = "/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=SSL&cpanel_jsonapi_func=installssl&crt="+cert+"&key="+key
+        print(color.green, requestUrl, color.end)
+        conn.request(method="POST", url=requestUrl, headers=self.headers, verify=False)
         res = conn.getresponse()
         data = res.read().decode("utf-8")
         print("SSL_installssl result: " + color.purple + data + color.end)
