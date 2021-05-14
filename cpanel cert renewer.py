@@ -1,5 +1,5 @@
 import json
-from ssl import VerifyFlags
+import ssl
 import sys, os, time
 import subprocess
 import http.client
@@ -23,6 +23,9 @@ class cpanelConn:
     def __init__(self, cpaneladdr, user, token):
         self.cpaneladdr = cpaneladdr
         self.headers = {"authorization": "cpanel " + user+":"+token}
+
+        if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
+            ssl._create_default_https_context = ssl._create_unverified_context
     
     def ZoneEdit_fetchzone_records(self, line, domain):
         print(color.yellow, line, domain, color.end)
@@ -33,7 +36,7 @@ class cpanelConn:
         
         print("request: fetchzone_records")
         requestUrl = "/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone_records&domain="+domain+"&line="+str(line)
-        conn.request(method="GET", url=requestUrl, headers=self.headers, verify=False)
+        conn.request(method="GET", url=requestUrl, headers=self.headers)
         res = conn.getresponse()
         data = res.read().decode("utf-8")
         
@@ -53,7 +56,7 @@ class cpanelConn:
             print("request: edit_zone_record")
             requestUrl = "/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=edit_zone_record&line="+str(line)+"&domain="+domain+"&name="+name+"&type="+type+"&txtdata="+txtdata
             print(color.green, requestUrl, color.end)
-            conn.request(method="GET", url=requestUrl, headers=self.headers, verify=False)
+            conn.request(method="GET", url=requestUrl, headers=self.headers)
             res = conn.getresponse()
             data = res.read().decode("utf-8")
             
@@ -72,7 +75,7 @@ class cpanelConn:
         print("request: installssl")
         requestUrl = "/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=SSL&cpanel_jsonapi_func=installssl&crt="+cert+"&key="+key
         print(color.green, requestUrl, color.end)
-        conn.request(method="POST", url=requestUrl, headers=self.headers, verify=False)
+        conn.request(method="POST", url=requestUrl, headers=self.headers)
         res = conn.getresponse()
         data = res.read().decode("utf-8")
         print("SSL_installssl result: " + color.purple + data + color.end)
