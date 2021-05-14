@@ -3,6 +3,7 @@ import sys, os, time
 import subprocess
 import http.client
 import urllib.parse
+import shutil
 
 config = None
 cpanel = None
@@ -103,7 +104,10 @@ def main():
         print("removing:", domain)
         output = subprocess.run([config["acmepath"], "--remove", "-d", domain], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout
         print(color.cyan + output + color.end)
-    
+        print("removing:", domain, "folder...", end="")
+        shutil.rmtree(os.path.join(config["acmefold"], domain))
+        print("done")
+
     for domain in config["domains"]:
         print("*" * len(domain) + "****")
         print("* " + domain + " *")
@@ -111,7 +115,7 @@ def main():
 
         print("issuing:", domain)
         issueCommand = [config["acmepath"], "--issue", "-d", domain, "-d", "*."+domain, "--dns", "--yes-I-know-dns-manual-mode-enough-go-ahead-please"]
-        print(color.blue + " ".join(issueCommand) + color.end)
+        print(color.green + " ".join(issueCommand) + color.end)
         output = subprocess.run(issueCommand, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout
         print(color.cyan + output + color.end)
 
@@ -136,7 +140,7 @@ def main():
 
             print("renewing for verification:", domain)
             renewCommand = [config["acmepath"], "--renew", "-d", domain, "--yes-I-know-dns-manual-mode-enough-go-ahead-please"]
-            print(color.blue + " ".join(renewCommand) + color.end)
+            print(color.green + " ".join(renewCommand) + color.end)
             output = subprocess.run(renewCommand, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True).stdout
             print(color.cyan + output + color.end)
 
