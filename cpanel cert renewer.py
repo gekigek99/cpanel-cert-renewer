@@ -24,8 +24,11 @@ class cpanelConn:
         self.headers = {"authorization": "cpanel " + user+":"+token}
     
     def ZoneEdit_fetchzone_records(self, line, domain):
-        print("connecting to:", self.cpaneladdr+":2083")
-        conn = http.client.HTTPSConnection(self.cpaneladdr+":2083")
+        print(color.yellow, line, domain, color.end)
+
+        cpanelAddrPort = self.cpaneladdr+":2083"
+        print("connecting to:", cpanelAddrPort)
+        conn = http.client.HTTPSConnection(cpanelAddrPort)
         
         print("request: fetchzone_records")
         conn.request(method="GET", url="/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone_records&domain="+domain+"&line="+str(line), headers=self.headers)
@@ -36,14 +39,19 @@ class cpanelConn:
         return data
 
     def ZoneEdit_edit_zone_record(self, line, domain, name, type, txtdata):
+        print(color.yellow, line, domain, name, type, txtdata, color.end)
+
         infoRecords = self.ZoneEdit_fetchzone_records(line, domain)
         
         if "_acme-challenge" in infoRecords:
-            print("connecting to:", self.cpaneladdr+":2083")
-            conn = http.client.HTTPSConnection(self.cpaneladdr+":2083")
+            cpanelAddrPort = self.cpaneladdr+":2083"
+            print("connecting to:", cpanelAddrPort)
+            conn = http.client.HTTPSConnection(cpanelAddrPort)
 
             print("request: edit_zone_record")
-            conn.request(method="GET", url="/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=edit_zone_record&line="+str(line)+"&domain="+domain+"&name="+name+"&type="+type+"&txtdata="+txtdata, headers=self.headers)
+            editUrl = "/json-api/cpanel?cpanel_jsonapi_apiversion=2&cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=edit_zone_record&line="+str(line)+"&domain="+domain+"&name="+name+"&type="+type+"&txtdata="+txtdata
+            print(color.green, editUrl, color.end)
+            conn.request(method="GET", url=editUrl, headers=self.headers)
             res = conn.getresponse()
             data = res.read().decode("utf-8")
             
@@ -135,7 +143,8 @@ def main():
                 print("zone record edit:", domainValues[n])
                 mainDomain = ".".join(domainValues[n].split(".")[-2:])
                 acmeChallengeSubDomain = ".".join(domainValues[n].split(".")[:-2])
-                print("mainDomain:", mainDomain, "\nacmeChallengeSubDomain:", acmeChallengeSubDomain)
+                print("mainDomain:              ", mainDomain)
+                print("acmeChallengeSubDomain:  ", acmeChallengeSubDomain)
                 cpanel.ZoneEdit_edit_zone_record(config["dnsZoneLine"][n], mainDomain, acmeChallengeSubDomain, "TXT", txtValues[n])
             
             print("waiting for propagation...")
